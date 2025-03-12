@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Barcode Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/instascan@1.0.0/instascan.min.js"></script>
+</head>
+<body>
+  <h1>Scan Barcode</h1>
+  <video id="preview" width="300" height="300"></video>
+  <div id="result"></div>
+
+  <script>
+    let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+
+    scanner.addListener('scan', function(barcode) {
+      document.getElementById('result').innerText = "Scanned: " + barcode;
+      window.location.href = `https://script.google.com/macros/s/SCRIPT_ID/exec?code=${barcode}`;
+    });
+
+    Instascan.Camera.getCameras().then(function(cameras) {
+      if (cameras.length > 0) {
+        scanner.start(cameras[0]); // Use the first available camera
+      } else {
+        alert('No cameras found. Make sure to allow camera access.');
+      }
+    }).catch(function(error) {
+      console.error(error);
+      alert('Camera error: ' + error);
+    });
+  </script>
+</body>
+</html>
+

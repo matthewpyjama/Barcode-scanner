@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Scanner</title>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+</head>
+<body>
+  <h1>Scan Barcode</h1>
+  <video id="preview" width="300" height="300" autoplay></video>
+  <div id="result"></div>
+
+  <script>
+    const codeReader = new ZXing.BrowserMultiFormatReader();
+    const videoElement = document.getElementById('preview');
+
+    codeReader
+      .listVideoInputDevices()
+      .then(videoInputDevices => {
+        if (videoInputDevices.length > 0) {
+          const firstDeviceId = videoInputDevices[0].deviceId;
+          codeReader.decodeFromVideoDevice(firstDeviceId, videoElement, (result, err) => {
+            if (result) {
+              const barcode = result.text;
+              document.getElementById('result').innerText = `Scanned Code: ${barcode}`;
+              
+              // Redirect to Google Apps Script
+              window.location.href = `https://script.google.com/macros/s/AKfycbwpX5lxoyDQaB8tJ9CzrHNinHIO4ogOCM0ifLryoIxJHyh0GU9yqVrDlVSepdFS-hbK/exec?code=${barcode}`;
+            }
+            if (err) {
+              console.error(err);
+            }
+          });
+        } else {
+          alert("No camera found. Please allow camera access.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error accessing camera.");
+      });
+  </script>
+</body>
+</html>

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Barcode Scanner</title>
-  <!-- Instascan library for barcode scanning -->
-  <script src="https://cdn.jsdelivr.net/npm/@ericblade/instascan@1.0.0/instascan.min.js"></script>
+  <!-- Self-hosted Instascan library -->
+  <script src="js/instascan.min.js"></script>
 </head>
 <body>
   <h1>Scan Barcode</h1>
@@ -11,25 +13,34 @@
   <div id="result"></div>
 
   <script>
-    let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
-    
-    scanner.addListener('scan', function(barcode) {
-      // Redirect to Google Apps Script with scanned barcode
-      window.location.href = `https://script.google.com/macros/s/SCRIPT_ID/exec?code=${barcode}`;
-    });
+    // Initialize scanner after library loads
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof Instascan === 'undefined') {
+        alert("Instascan failed to load. Check the JS file.");
+        return;
+      }
 
-    // Start the camera
-    Instascan.Camera.getCameras()
-      .then(function(cameras) {
-        if (cameras.length > 0) {
-          scanner.start(cameras[0]);
-        } else {
-          alert('No cameras found. Allow camera access.');
-        }
-      })
-      .catch(function(error) {
-        alert('Camera error: ' + error);
+      let scanner = new Instascan.Scanner({ 
+        video: document.getElementById('preview'),
+        mirror: false // Disable mirroring for better UX
       });
+
+      scanner.addListener('scan', function(barcode) {
+        window.location.href = `https://script.google.com/macros/s/AKfycbwpX5lxoyDQaB8tJ9CzrHNinHIO4ogOCM0ifLryoIxJHyh0GU9yqVrDlVSepdFS-hbK/exec?code=${barcode}`;
+      });
+
+      Instascan.Camera.getCameras()
+        .then(function(cameras) {
+          if (cameras.length > 0) {
+            scanner.start(cameras[0]); // Use first camera
+          } else {
+            alert("No cameras detected. Allow camera access.");
+          }
+        })
+        .catch(function(error) {
+          alert("Camera error: " + error);
+        });
+    });
   </script>
 </body>
 </html>

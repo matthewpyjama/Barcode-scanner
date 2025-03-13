@@ -2,7 +2,8 @@
 <html>
 <head>
   <title>Barcode Scanner</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <!-- Load Instascan from a reliable CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/instascan@1.0.0/instascan.min.js"></script>
 </head>
 <body>
   <h1>Scan Barcode</h1>
@@ -10,34 +11,28 @@
   <div id="result"></div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#preview"),
-          constraints: {
-            facingMode: "environment" // Use back camera
-          }
-        },
-        decoder: {
-          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "qr_reader"]
-        }
-      }, function(err) {
-        if (err) {
-          console.error(err);
-          alert("Error initializing Quagga: " + err);
-          return;
-        }
-        Quagga.start();
-      });
-
-      Quagga.onDetected(function(result) {
-        let barcode = result.codeResult.code;
-        document.getElementById("result").innerText = "Scanned: " + barcode;
-        window.location.href = `https://script.google.com/macros/s/SCRIPT_ID/exec?code=${barcode}`;
-      });
+    let scanner = new Instascan.Scanner({ 
+      video: document.getElementById('preview'),
+      mirror: false // Disable mirror mode for better UX
     });
+
+    // Handle scans
+    scanner.addListener('scan', function(barcode) {
+      window.location.href = `https://script.google.com/macros/s/AKfycbwpX5lxoyDQaB8tJ9CzrHNinHIO4ogOCM0ifLryoIxJHyh0GU9yqVrDlVSepdFS-hbK/exec?code=${barcode}`;
+    });
+
+    // Start the camera
+    Instascan.Camera.getCameras()
+      .then(function(cameras) {
+        if (cameras.length > 0) {
+          scanner.start(cameras[0]); // Use the first camera
+        } else {
+          alert('No cameras found. Allow camera access and refresh.');
+        }
+      })
+      .catch(function(error) {
+        alert('Camera error: ' + error);
+      });
   </script>
 </body>
 </html>
